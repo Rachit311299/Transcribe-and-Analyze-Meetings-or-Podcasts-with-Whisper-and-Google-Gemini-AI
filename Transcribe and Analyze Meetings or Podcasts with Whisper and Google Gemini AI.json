@@ -1,0 +1,899 @@
+{
+  "name": "Transcribe and Analyze Meetings or Podcasts with Whisper and Google Gemini AI",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "41fb00ed-9bd1-495a-935b-714d562ab539",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        912,
+        1008
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc",
+          "mode": "list",
+          "cachedResultName": "Audio File Links",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "0d9ec033-f75c-4ad4-9d70-fcfd9045e363",
+      "name": "Get audio urls",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        464,
+        1008
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FV2praladqKza3UE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc",
+          "mode": "list",
+          "cachedResultName": "Elevenlabs Speech-to-Text",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Loop Over Items').item.json.row_number }}",
+            "DOCS ID": "={{\"https://docs.google.com/document/d/\" + $node[\"Create Doc\"].json[\"id\"] + \"/edit\"}}",
+            "DONE": "x"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "AUDIO URL",
+              "displayName": "AUDIO URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DONE",
+              "displayName": "DONE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DOCS ID",
+              "displayName": "DOCS ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ac72a840-ce27-490c-ab7f-003b5ec3684a",
+      "name": "Update row",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2160,
+        848
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FV2praladqKza3UE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite-preview-06-17",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite-preview-06-17"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Full transcript:\n{{ $json.text }}"
+            }
+          ]
+        },
+        "options": {
+          "systemMessage": "=# Meeting Transcript Analysis AI Agent - System Prompt\n\nYou are an expert AI agent specialized in analyzing and summarizing transcriptions from meetings, podcasts, interviews, webinars, and other audio/video content. Your primary function is to extract meaningful insights and create comprehensive summaries from spoken content that has been converted to text.\n\n## Core Responsibilities\n\n**Primary Function**: Analyze and summarize transcribed content with high accuracy and relevance, focusing on key information extraction and actionable insights.\n\n## Analysis Capabilities\n\n### Content Types You Handle\n- Business meetings (team meetings, board meetings, client calls)\n- Podcasts and interviews\n- Webinars and presentations  \n- Conference calls and video conferences\n- Training sessions and workshops\n- Sales calls and customer interactions\n- Academic lectures and seminars\n\n### Key Analysis Areas\n- **Main Topics & Themes**: Identify central discussion points and recurring themes\n- **Key Decisions**: Extract decisions made, consensus reached, and resolutions\n- **Action Items**: Identify tasks assigned, deadlines, and responsibilities\n- **Key Participants**: Note important speakers and their contributions\n- **Important Quotes**: Capture significant statements and insights\n- **Follow-up Items**: Identify what needs to happen next\n- **Conflicts or Issues**: Note disagreements, concerns, or problems discussed\n\n## Summary Structure Guidelines\n\nWhen summarizing transcripts, organize your output using this structure:\n\n### Executive Summary\n- Brief overview of the main purpose and outcome (2-3 sentences)\n\n### Key Discussion Points\n- Main topics covered in order of importance\n- Context and background information when relevant\n\n### Decisions Made\n- Clear list of decisions reached\n- Who made the decisions and any voting/consensus details\n\n### Action Items\n- Specific tasks identified\n- Assigned person/team (when mentioned)\n- Deadlines or timeframes (when specified)\n\n### Important Insights\n- Notable quotes, ideas, or revelations\n- Expert opinions or recommendations shared\n\n### Next Steps\n- Follow-up meetings or actions planned\n- Unresolved items requiring future attention\n\n## Quality Standards\n\n### Accuracy Requirements\n- Maintain fidelity to the original content\n- Do not infer information not present in the transcript\n- Clearly distinguish between stated facts and implied meanings\n- Preserve the context and tone when relevant\n\n### Clarity Standards\n- Use clear, professional language\n- Organize information logically\n- Highlight the most important information\n- Make summaries scannable with appropriate headers\n\n### Completeness Guidelines\n- Cover all major topics discussed\n- Include all action items and decisions\n- Note important participant contributions\n- Capture timeline and sequence when relevant\n\n## Special Handling Instructions\n\n### For Meeting Transcripts\n- Focus on business outcomes and decisions\n- Highlight resource allocation and budget discussions\n- Note attendance and key participant roles\n- Identify meeting effectiveness and any process issues\n\n### For Podcasts/Interviews\n- Emphasize key insights and expert opinions\n- Note interesting anecdotes or case studies\n- Highlight actionable advice or recommendations\n- Capture the guest's background and credentials when relevant\n\n### For Technical Content\n- Explain complex concepts in accessible language\n- Note technical specifications or requirements\n- Highlight implementation details and timelines\n- Identify technical challenges or solutions discussed\n\n## Response Formatting\n\n- Use markdown formatting for better readability\n- Apply consistent header hierarchy\n- Use bullet points for lists and action items\n- Bold key terms and important information\n- Include relevant timestamps when available in the source\n\n## Adaptive Analysis\n\nAdjust your analysis depth and focus based on:\n- Content length and complexity\n- Apparent purpose of the original meeting/content\n- Level of technical detail present\n- Stakeholder types involved\n- Urgency indicators in the content\n\n## Limitations Acknowledgment\n\nWhen encountering unclear audio transcription, multiple speakers, or ambiguous content:\n- Note areas where the transcript may be unclear\n- Indicate when speaker identification is uncertain\n- Flag potential transcription errors that affect meaning\n- Suggest areas that may need clarification from participants\n\nYour goal is to transform raw transcribed content into organized, actionable summaries that save time and ensure nothing important is mi"
+        }
+      },
+      "id": "a05956e3-2151-4897-94f5-8b63972a1ada",
+      "name": "Transcript Analysis",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "position": [
+        1584,
+        1040
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Hi7sE97IDOZ7v13V",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ JSON.parse($('Get audio urls').item.json[\"MEMBERS\"]).join(\",\") }}",
+        "subject": "=[N8N] Recap",
+        "message": "={{ $json.data }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "6a8e5bd2-8a45-4f9f-bd57-e80c071dbd67",
+      "name": "Send email",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2160,
+        1104
+      ],
+      "webhookId": "a9460f49-968a-412d-8805-9c583f23c52f",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cIICZk5LbDVYKfYf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "id": "84780869-7d02-4d43-8831-9eac1409f79b",
+      "name": "Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "position": [
+        1936,
+        1040
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{$node[\"Create Doc\"].json[\"id\"]}}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{$node[\"Transcribe a recording\"].json[\"text\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "ab04db7f-43f8-43aa-a476-b19ca55f8b5e",
+      "name": "Add Transcript to Doc",
+      "type": "n8n-nodes-base.googleDocs",
+      "position": [
+        1936,
+        848
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "ShdWNDxx8jW5j7DJ",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "1asJlb4k1_yqpUM8a1qAqSORePD0wRbeG",
+        "title": "={{$node[\"HTTP Request\"].binary.data.fileName.replace(/\\.[^/.]+$/, \"\")}}\n"
+      },
+      "id": "70c2a0e6-7d19-457a-ad28-3bb6dafa7142",
+      "name": "Create Doc",
+      "type": "n8n-nodes-base.googleDocs",
+      "position": [
+        1648,
+        848
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "ShdWNDxx8jW5j7DJ",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{$json[\"AUDIO URL\"]}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1136,
+        944
+      ],
+      "id": "52356535-7649-45f7-9386-31918eed807f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1360,
+        944
+      ],
+      "id": "058fd9fb-9bab-4ee8-b841-7d6d093db27d",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "XlYCssgZuEN6MNSW",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "=has:attachment (filename:mp3 OR filename:wav OR filename:m4a OR filename:mp4 OR filename:m4v OR filename:mov)   -label:processed in:inbox"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -656,
+        1008
+      ],
+      "id": "75ddd78f-2cf3-4027-8bc3-fda81b326548",
+      "name": "Gmail Trigger",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cIICZk5LbDVYKfYf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assumes Gmail Trigger: Simplify OFF + Download Attachments ON\nconst item = items[0];\nconst out = [];\nconst bins = item.binary || {};\nfor (const [key, bin] of Object.entries(bins)) {\n  out.push({\n    json: {\n      messageId: item.json.id,\n      threadId: item.json.threadId,\n      fileName: bin.fileName || key,\n      mimeType: bin.mimeType || bin.mime || 'application/octet-stream',\n    },\n    binary: { data: bin }, // normalize to \"data\"\n  });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        1152
+      ],
+      "id": "ea13b81d-eb60-4aa2-9ace-c76765445b49",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "name": "={{$json.fileName}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1X7GuYaoUS-7a4IzcKiP8rRyzFaq-_1fR",
+          "mode": "list",
+          "cachedResultName": "Audios",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1X7GuYaoUS-7a4IzcKiP8rRyzFaq-_1fR"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        1152
+      ],
+      "id": "6ead7fff-a7c1-4c34-8b3b-7933a50c1ae0",
+      "name": "Upload file",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "zzJReFNXrghzbGgn",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.messageId }}",
+        "labelIds": [
+          "Label_2067575090392757816"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        816
+      ],
+      "id": "9cde8d04-b8af-4d67-a68b-c0c151fa0d98",
+      "name": "Add label to message",
+      "webhookId": "c0744d5f-2981-4982-aed6-287dec155b6c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cIICZk5LbDVYKfYf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -432,
+        864
+      ],
+      "id": "774e9cf8-90b9-4018-922a-0bf461ba7d0c",
+      "name": "Get message",
+      "webhookId": "baaa33ad-f289-4920-b285-129fc8055f4b",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cIICZk5LbDVYKfYf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items from \"Gmail → Message → Get\"\n// Output: { messageId, from[], to[], cc[], members[] }\n\nfunction extractFromHeader(raw) {\n  if (!raw) return [];\n  // remove leading \"Header-Name: \"\n  const cleaned = raw.replace(/^[^:]+:\\s*/i, '');\n  return cleaned.split(',').map(s => {\n    const m = s.match(/<([^>]+)>/);\n    const cand = m ? m[1] : s;\n    const em = cand.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i);\n    return em ? em[0].trim() : null;\n  }).filter(Boolean);\n}\n\nreturn items.map(({ json }) => {\n  // 1) Prefer parsed fields (from.value[], to.value[], cc.value[])\n  const fromParsed = Array.isArray(json?.from?.value)\n    ? json.from.value.map(v => v.address).filter(Boolean)\n    : null;\n  const toParsed = Array.isArray(json?.to?.value)\n    ? json.to.value.map(v => v.address).filter(Boolean)\n    : null;\n  const ccParsed = Array.isArray(json?.cc?.value)\n    ? json.cc.value.map(v => v.address).filter(Boolean)\n    : null;\n\n  // 2) Fallback to headers map (note: values include the \"From: ...\" prefix)\n  const h = json.headers || {};\n  const fromHdr = extractFromHeader(h['from']);\n  const toHdr   = extractFromHeader(h['to']) || extractFromHeader(h['delivered-to']);\n  const ccHdr   = extractFromHeader(h['cc']);\n\n  const from = fromParsed?.length ? fromParsed : fromHdr;\n  const to   = toParsed?.length   ? toParsed   : toHdr;\n  const cc   = ccParsed?.length   ? ccParsed   : ccHdr;\n\n  // Message ID: prefer json.id; fallback to messageId or header value\n  const messageId =\n    json.id ||\n    json.messageId ||\n    (h['message-id'] ? h['message-id'].replace(/^[^:]+:\\s*/i, '') : '');\n\n  return {\n    json: {\n      messageId,\n      from,\n      to,\n      cc,\n      members: Array.from(new Set([...(from || []), ...(to || []), ...(cc || [])])),\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        864
+      ],
+      "id": "f2df5bac-9160-4ec6-a892-256aba4f4f79",
+      "name": "Extract info from Email"
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "writer",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        16,
+        1200
+      ],
+      "id": "c38830a4-3c50-4bf4-8c5d-f1c4405d0888",
+      "name": "Share file",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "zzJReFNXrghzbGgn",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc",
+          "mode": "list",
+          "cachedResultName": "Audio File Links",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zbZyaTPfBqaptPWQYpawfBUyoeQd_-wMEh7cR1Zfmjc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "TIMESTAMP": "={{ $now }}",
+            "FROM": "={{ $json.from }}",
+            "TO": "={{ $json.to }}",
+            "CC": "={{ $json.cc }}",
+            "MEMBERS": "={{ $json.members }}",
+            "AUDIO URL": "={{ $json.webContentLink }}",
+            "FILE NAME": "={{ $json.name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "FILE NAME",
+              "displayName": "FILE NAME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TIMESTAMP",
+              "displayName": "TIMESTAMP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AUDIO URL",
+              "displayName": "AUDIO URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "FROM",
+              "displayName": "FROM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TO",
+              "displayName": "TO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CC",
+              "displayName": "CC",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "MEMBERS",
+              "displayName": "MEMBERS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DONE",
+              "displayName": "DONE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DOCS ID",
+              "displayName": "DOCS ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "useAppend": false
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        1008
+      ],
+      "id": "cf115275-7605-4acc-a63c-3f90efde0247",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FV2praladqKza3UE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        16,
+        1008
+      ],
+      "id": "61daf7ae-26d1-4eb4-a240-7db88822a876",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0945e92c-6065-4fdd-9981-4d3357abf32a",
+              "leftValue": "={{ $json.DONE }}",
+              "rightValue": "x",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        1008
+      ],
+      "id": "61bd1165-2517-4b69-8039-2e4981a23c4f",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Doc": {
+      "main": [
+        [
+          {
+            "node": "Add Transcript to Doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row": {
+      "main": [
+        []
+      ]
+    },
+    "Get audio urls": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcript Analysis": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Transcript to Doc": {
+      "main": [
+        [
+          {
+            "node": "Update row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Create Doc",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Transcript Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get message": {
+      "main": [
+        [
+          {
+            "node": "Extract info from Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract info from Email": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        []
+      ]
+    },
+    "Add label to message": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Get audio urls",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "9d99f8f3-f26f-418e-875a-21cd41047cd5",
+  "meta": {
+    "templateId": "8755",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8ba16f7cf19542f964466b09844f9bb371104c33cbcb40ef4b0e27215da320e8"
+  },
+  "id": "vkRo5rviV0sfQtgn",
+  "tags": []
+}
