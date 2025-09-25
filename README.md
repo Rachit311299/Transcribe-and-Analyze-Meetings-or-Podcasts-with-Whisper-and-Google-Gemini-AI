@@ -93,8 +93,8 @@ If successful:
   - Check OpenAI Whisper API key & usage limits.  
 - **Gemini errors?**  
   - Make sure API key is valid and quota isn’t exceeded.  
-- **Duplicate processing?**  
-  - Ensure “DONE” column is being updated in Google Sheets.  
+- **Duplicate processing?**
+  - Ensure “DONE” column is being updated in Google Sheets. If you havent created a gmail label named "Processed" , create it and use it in the gmail label node .
 
 ---
 
