@@ -5,12 +5,14 @@ This project is an **automation workflow for n8n** that takes meeting or podcast
 It’s designed to save hours of manual transcription and note-taking, while ensuring key insights, decisions, and action items never get lost.  
 
 ---
+ <img width="1822" height="838" alt="Screenshot 2025-09-25 133608" src="https://github.com/user-attachments/assets/f96f3b91-a58d-4ecf-aef3-b71cbdcbcef3" />
 
 ## ⚡ Features
 - **Trigger on Gmail** → Detects new emails with audio/video attachments.  
 - **File Management** → Uploads files to Google Drive, logs them in Google Sheets.  
 - **Transcription** → Uses OpenAI Whisper to generate accurate transcripts.  
-- **Summarization** → Uses Google Gemini AI to extract:  
+- **Summarization** → Uses Google Gemini AI to extract: 
+
   - Executive summary  
   - Key discussion points  
   - Decisions made  
